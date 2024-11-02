@@ -1,0 +1,18 @@
+{
+  "appId": "com.cvs",
+  "files": ["dist-electron", "dist-react"],
+  "extraResources": ["dist-electron/preload.cjs"],
+  "mac": {
+    "target": "dmg",
+    "icon": "icon.icns"
+  },
+  "linux": {
+    "target": "AppImage",
+    "category": "Utility",
+    "icon": "icon.ico"
+  },
+  "win": {
+    "target": ["portable", "msi"],
+    "icon": "icon.ico"
+  }
+}

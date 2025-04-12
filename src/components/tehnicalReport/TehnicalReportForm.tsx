@@ -12,7 +12,7 @@ import { Input } from "../ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultValues, formSchema } from "./FormSchema";
 import { Button } from "../ui/button";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Check, Clipboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "../ui/calendar";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
@@ -36,8 +36,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useEffect, useState } from "react";
 
 export default function TehnicalReportForm() {
+  const [clipboard, setClipboard] = useState(false);
   const form = useForm<VehicleReportFormInputs>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
@@ -48,19 +50,39 @@ export default function TehnicalReportForm() {
   const pickedHook = form.watch("hook");
 
   function onSubmit(values: VehicleReportFormInputs) {
-    window.electron.generateTehnicalReport(values) 
+    window.electron.generateTehnicalReport(values);
   }
-  
-  function handleResetForm() {  
-    form.setFocus('business_number')
-    form.reset()
 
-    
+  function handleResetForm() {
+    form.setFocus("business_number");
+    form.reset();
   }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(form.getValues("vin"));
+    setClipboard(true);
+  }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setClipboard(false);
+    }, 3000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [clipboard]);
+
+  useEffect(() => {
+    console.log(form);
+  }, [form]);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="px-5 grid gap-5 grid-cols-[310px_310px_310px] grid-rows-[75px_75px_75px_75px_90px_75px_75px_75px]">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="px-5 grid gap-5 grid-cols-[310px_310px_310px] grid-rows-[75px_75px_75px_75px_90px_75px_75px_75px]"
+      >
         <FormField
           control={form.control}
           name="business_number"
@@ -80,19 +102,34 @@ export default function TehnicalReportForm() {
           render={({ field }) => (
             <FormItem className="col-span-2">
               <FormLabel>Идентификационен број на возилото</FormLabel>
-              <FormControl>
-                <InputOTP
-                  maxLength={CHASSIS_NUMBER}
-                  {...field}
-                  pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+              <div className="flex item-center gap-3">
+                <FormControl>
+                  <InputOTP
+                    maxLength={CHASSIS_NUMBER}
+                    {...field}
+                    pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+                  >
+                    <InputOTPGroup>
+                      {Array.from({ length: CHASSIS_NUMBER }).map(
+                        (_, index) => (
+                          <InputOTPSlot
+                            key={index}
+                            index={index}
+                            className="h-[30px] w-[30px]"
+                          />
+                        )
+                      )}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <Button
+                  className="size-7"
+                  type="button"
+                  onClick={copyToClipboard}
                 >
-                  <InputOTPGroup>
-                    {Array.from({ length: CHASSIS_NUMBER }).map((_, index) => (
-                      <InputOTPSlot key={index} index={index} className="h-[30px] w-[30px]" />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
-              </FormControl>
+                  {!clipboard ? <Clipboard /> : <Check />}
+                </Button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -108,7 +145,9 @@ export default function TehnicalReportForm() {
                   <FormControl>
                     <Button
                       variant="outline"
-                      className={cn("w-full pl-3 text-left font-normal h-[30px]")}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal h-[30px]"
+                      )}
                     >
                       {format(field.value, "dd/MM/yyyy")}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -148,7 +187,7 @@ export default function TehnicalReportForm() {
             <FormItem>
               <FormLabel>Марка на возилото</FormLabel>
               <FormControl>
-                <Input {...field}  className="h-[30px]"/>
+                <Input {...field} className="h-[30px]" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -177,7 +216,11 @@ export default function TehnicalReportForm() {
                 <InputOTP maxLength={YEAR_NUMBER} {...field}>
                   <InputOTPGroup>
                     {Array.from({ length: YEAR_NUMBER }).map((_, index) => (
-                      <InputOTPSlot key={index} index={index} className="h-[30px] w-[30px]"/>
+                      <InputOTPSlot
+                        key={index}
+                        index={index}
+                        className="h-[30px] w-[30px]"
+                      />
                     ))}
                   </InputOTPGroup>
                 </InputOTP>
@@ -193,7 +236,7 @@ export default function TehnicalReportForm() {
             <FormItem>
               <FormLabel>Комерцијална ознака</FormLabel>
               <FormControl>
-                <Input {...field} className="h-[30px]"/>
+                <Input {...field} className="h-[30px]" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -208,7 +251,7 @@ export default function TehnicalReportForm() {
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="h-[30px]">
-                    <SelectValue  />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {addresses.map((option, i) => (
@@ -230,7 +273,7 @@ export default function TehnicalReportForm() {
             <FormItem>
               <FormLabel>Варијанта / изведба</FormLabel>
               <FormControl>
-                <Input {...field} className="h-[30px]"/>
+                <Input {...field} className="h-[30px]" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -262,7 +305,7 @@ export default function TehnicalReportForm() {
             </FormItem>
           )}
         />
-         <FormField
+        <FormField
           control={form.control}
           name="category"
           render={({ field }) => (
@@ -299,11 +342,13 @@ export default function TehnicalReportForm() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {car_body[pickedCategory]?.map((option:string, i:number) => (
-                        <SelectItem value={option} key={i}>
-                          {option}
-                        </SelectItem>
-                      ))}
+                      {car_body[pickedCategory]?.map(
+                        (option: string, i: number) => (
+                          <SelectItem value={option} key={i}>
+                            {option}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -323,7 +368,7 @@ export default function TehnicalReportForm() {
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                   className="flex flex-col space-y-1"
                 >
                   {glasses.map((option, i) => (
@@ -365,7 +410,7 @@ export default function TehnicalReportForm() {
                 <FormItem className="row-start-7 col-start-2">
                   <FormLabel>Задното сигурносно стакло</FormLabel>
                   <FormControl>
-                    <Input {...field} className="h-[30px]"/>
+                    <Input {...field} className="h-[30px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -382,7 +427,7 @@ export default function TehnicalReportForm() {
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                   className="flex flex-col space-y-1"
                 >
                   {hook.map((option, i) => (
@@ -424,7 +469,7 @@ export default function TehnicalReportForm() {
                 <FormItem className="row-start-7 col-start-3">
                   <FormLabel>Одобрение на кука</FormLabel>
                   <FormControl>
-                    <Input {...field} className="h-[30px]"/>
+                    <Input {...field} className="h-[30px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -457,12 +502,17 @@ export default function TehnicalReportForm() {
           )}
         />
         <div className=" row-start-8 flex gap-2 mt-5">
-        <Button type="submit" className="w-[200px] row-start-8">
-          Генерирај Извештај
-        </Button>
-        <Button type="button" className="w-[100px]" variant="destructive" onClick={handleResetForm}>
-          Избриши
-        </Button>
+          <Button type="submit" className="w-[200px] row-start-8">
+            Генерирај Извештај
+          </Button>
+          <Button
+            type="button"
+            className="w-[100px]"
+            variant="destructive"
+            onClick={handleResetForm}
+          >
+            Избриши
+          </Button>
         </div>
       </form>
     </Form>

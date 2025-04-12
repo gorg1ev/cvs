@@ -8,6 +8,7 @@ app.on("ready", () => {
     webPreferences: {
       preload: preloaderPath(),
       nodeIntegration: true,
+      devTools: isDev(),
     },
   });
   mainWindow.maximize();

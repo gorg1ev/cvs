@@ -9,7 +9,7 @@ const M = [
 
 const N = ["BA-Kесон", "BB-Фургон"];
 
-const L = ["", ""];
+const L = ["EA-Мопед", "EB-Моторцикл"];
 
 export const car_body: CarBody = {
   "M1-Патничко": M,

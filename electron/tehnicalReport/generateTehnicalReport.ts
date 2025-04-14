@@ -7,14 +7,21 @@ import { saveAsDialog } from "../saveAsDialog.js";
 import { BaseWindow } from "electron";
 import { app } from "electron";
 import { generateVehicleText } from "./generateVehicleText.js";
+import { isDev } from "../utils.js";
 
 export function generateTehnicalReport(
   mainWindow: BaseWindow,
   data: VehicleReportFormInputs
 ) {
-  const content = fs.readFileSync(
-    path.resolve(app.getAppPath(), "./dist-electron/input.docx")
-  );
+  let templatePath;
+
+  if (isDev()) {
+    templatePath = path.join(app.getAppPath(), "electron/assets/input.docx");
+  } else {
+    templatePath = path.join(process.resourcesPath, "assets/input.docx");
+  }
+
+  const content = fs.readFileSync(templatePath);
 
   const zip = new pizzip(content);
 

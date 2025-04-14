@@ -1,7 +1,15 @@
 {
   "appId": "com.cvs",
   "files": ["dist-electron", "dist-react"],
-  "extraResources": ["dist-electron/preload.cjs"],
+  "extraResources": [
+    "dist-electron/preload.cjs",
+    {
+      "from": "electron/assets",
+      "to": "assets",
+      "filter": ["**/*.docx"]
+    }
+  ],
+
   "mac": {
     "target": "dmg",
     "icon": "icon.icns"
